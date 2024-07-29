@@ -2,6 +2,7 @@ package org.lightningpop.modules;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.world.damagesource.DamageSource;
@@ -10,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.rusherhack.client.api.events.network.EventPacket;
 import org.rusherhack.client.api.feature.module.ModuleCategory;
 import org.rusherhack.client.api.feature.module.ToggleableModule;
@@ -20,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class LightningPopModule extends ToggleableModule {
     private static final Logger LOGGER = LogManager.getLogger("LightningPopPlugin");
@@ -99,13 +102,8 @@ public class LightningPopModule extends ToggleableModule {
     }
 
     private void spawnLightning(Player player) {
-        if (minecraft.level != null && minecraft.level.isClientSide) {
-            LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, minecraft.level);
-            lightningBolt.setPos(player.position());
-            minecraft.level.addFreshEntity(lightningBolt);
-            LOGGER.debug("Spawned lightning at {}", player.getName().getString());
-        } else {
-            LOGGER.debug("Minecraft level is not client-side or is null, cannot spawn lightning.");
-        }
+        if(minecraft.player == null || minecraft.level == null) return;
+        ClientboundAddEntityPacket packet = new ClientboundAddEntityPacket(-1, UUID.randomUUID(), player.getX(), player.getY(), player.getZ(), 0, 0,EntityType.LIGHTNING_BOLT,0,new Vec3(0,0,0),0);
+        packet.handle(minecraft.player.connection);
     }
 }
