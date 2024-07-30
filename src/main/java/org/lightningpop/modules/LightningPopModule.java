@@ -15,16 +15,18 @@ import org.rusherhack.client.api.feature.module.ModuleCategory;
 import org.rusherhack.client.api.feature.module.ToggleableModule;
 import org.rusherhack.core.event.subscribe.Subscribe;
 import org.rusherhack.core.setting.BooleanSetting;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Module that triggers lightning effects in Minecraft when certain events occur,
+ * such as totem pops or player deaths.
+ */
 public class LightningPopModule extends ToggleableModule {
-    private static final Logger LOGGER = LogManager.getLogger("LightningPopPlugin");
     private final Minecraft minecraft = Minecraft.getInstance();
 
+    // Settings for different lightning effects
     private final BooleanSetting totemPop = new BooleanSetting("TotemPop", "Lightning on totem pop", true);
     private final BooleanSetting selfTotemPop = new BooleanSetting("Self", "Include your own totem pops", true);
     private final BooleanSetting playerDeath = new BooleanSetting("PlayerDeath", "Lightning on player death", true);
@@ -39,8 +41,6 @@ public class LightningPopModule extends ToggleableModule {
 
     @Subscribe
     public void onPacketReceive(EventPacket.Receive event) {
-        LOGGER.debug("onPacketReceive method invoked");
-
         Packet<?> packet = event.getPacket();
         if (packet instanceof ClientboundDamageEventPacket) {
             handleDamagePacket((ClientboundDamageEventPacket) packet);
@@ -66,7 +66,6 @@ public class LightningPopModule extends ToggleableModule {
         if (minecraft.level == null) return;
 
         byte eventId = entityPacket.getEventId();
-        LOGGER.debug("Entity event packet received with Event ID: {}", eventId);
 
         if (eventId == 35) {
             handleTotemPopEvent(entityPacket);
@@ -102,10 +101,8 @@ public class LightningPopModule extends ToggleableModule {
         if (minecraft.level != null && minecraft.level.isClientSide) {
             LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, minecraft.level);
             lightningBolt.setPos(player.position());
+            // Thank you kybe236
             this.minecraft.level.addEntity(lightningBolt);
-            LOGGER.debug("Spawned lightning at {}", player.getName().getString());
-        } else {
-            LOGGER.debug("Minecraft level is not client-side or is null, cannot spawn lightning.");
         }
     }
 }
