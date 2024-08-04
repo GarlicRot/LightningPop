@@ -1,4 +1,4 @@
-# LightningPop
+# LightningPop ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/GarlicRot/LightningPop/total)
 
 A RusherHacks Plugin - Spawns Lightning On Totem Pops And Player Deaths.
 
