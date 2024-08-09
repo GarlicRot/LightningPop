@@ -30,12 +30,15 @@ public class LightningPopModule extends ToggleableModule {
     private final BooleanSetting totemPop = new BooleanSetting("TotemPop", "Lightning on totem pop", true);
     private final BooleanSetting selfTotemPop = new BooleanSetting("Self", "Include your own totem pops", true);
     private final BooleanSetting playerDeath = new BooleanSetting("PlayerDeath", "Lightning on player death", true);
+    private final BooleanSetting attackDeath = new BooleanSetting("AttackDeath", "Lightning on player attack death", true);
+    private final BooleanSetting anyDeath = new BooleanSetting("AnyDeath", "Lightning on any player death within visual range", true);
 
     private final Map<Entity, Entity> playerAttackerMap = new HashMap<>();
 
     public LightningPopModule() {
         super("LightningPop", ModuleCategory.MISC);
         this.totemPop.addSubSettings(this.selfTotemPop);
+        this.playerDeath.addSubSettings(this.attackDeath, this.anyDeath);
         this.registerSettings(this.totemPop, this.playerDeath);
     }
 
@@ -88,11 +91,11 @@ public class LightningPopModule extends ToggleableModule {
         if (!(entity instanceof Player player)) return;
 
         Entity attacker = playerAttackerMap.get(player);
-        if (attacker == null) return;
+        if (attacker != null) {
+            playerAttackerMap.remove(player);
+        }
 
-        playerAttackerMap.remove(player);
-
-        if (playerDeath.getValue() && (attacker == minecraft.player)) {
+        if (playerDeath.getValue() && ((attacker != null && attackDeath.getValue()) || anyDeath.getValue())) {
             spawnLightning(player);
         }
     }

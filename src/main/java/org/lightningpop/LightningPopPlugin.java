@@ -14,7 +14,7 @@ public class LightningPopPlugin extends Plugin {
 
     @Override
     public void onLoad() {
-        LOGGER.info("Loading LightningPop Plugin...");
+        LOGGER.info("Charging up the LightningPop Plugin...");
 
         // Register the LightningPopModule
         RusherHackAPI.getModuleManager().registerFeature(lightningPopModule);
@@ -23,17 +23,17 @@ public class LightningPopPlugin extends Plugin {
         IEventBus eventBus = RusherHackAPI.getEventBus();
         eventBus.subscribe(lightningPopModule);
 
-        LOGGER.info("LightningPop Plugin loaded successfully.");
+        LOGGER.info("LightningPop Plugin fully charged and ready to strike!");
     }
 
     @Override
     public void onUnload() {
-        LOGGER.info("Unloading LightningPop Plugin...");
+        LOGGER.info("Discharging the LightningPop Plugin...");
 
         // Unsubscribe the module from the event bus
         IEventBus eventBus = RusherHackAPI.getEventBus();
         eventBus.unsubscribe(lightningPopModule);
 
-        LOGGER.info("LightningPop Plugin unloaded.");
+        LOGGER.info("LightningPop Plugin safely grounded.");
     }
 }
