@@ -13,7 +13,7 @@
 </p>
 
 
-## ⚡Features:
+## ⚡Features: 
 
 - **TotemPop:** Enable or disable lightning effects for totem pops.
     - **Self:** Include or exclude your own totem pops in the lightning effect.
