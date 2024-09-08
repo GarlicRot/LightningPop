@@ -1,7 +1,7 @@
 {
   "Plugin-Class": "org.lightningpop.LightningPopPlugin",
   "Name": "LightningPop",
-  "Version": "1.0.1",
+  "Version": "1.0.2",
   "Description": "Lightning Strike For Totem Pops & Death",
   "Authors": ["Garlicrot"],
   "Minecraft-Versions": [
