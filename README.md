@@ -8,7 +8,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/github/downloads/GarlicRot/LightningPop/total?label=Downloads" alt="GitHub Downloads (all assets, all releases)">
-  <img src="https://img.shields.io/badge/Minecraft-1.20.1%20--%201.21-62b47a?style=flat&logo=minecraft&logoColor=white" alt="Minecraft Version">
+  <img src="https://img.shields.io/badge/Minecraft-1.20.1%20--%201.21.1-62b47a?style=flat&logo=minecraft&logoColor=white" alt="Minecraft Version">
   <img src="https://img.shields.io/badge/%F0%9F%A7%84-Approved%20%E2%9C%94%EF%B8%8F-blue?style=flat" alt="🧄 Approved ✔️">
 </p>
 
