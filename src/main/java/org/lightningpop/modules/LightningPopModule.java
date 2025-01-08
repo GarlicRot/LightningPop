@@ -131,13 +131,20 @@ public class LightningPopModule extends ToggleableModule {
         if (!(attacker instanceof Player)) return;  // Only proceed if attacker is a player
 
         // Handle the AttackMob and AnyMob settings
-        if (mobs.getValue() && ((attacker == minecraft.player && attackMob.getValue()) || anyMob.getValue())) {
-            spawnLightning(mob);
+        if (mobs.getValue()) {
+            if (attacker == minecraft.player && attackMob.getValue()) {
+                // Trigger lightning only if "AttackMob" is enabled and you killed the mob
+                spawnLightning(mob);
+            } else if (attacker != minecraft.player && anyMob.getValue()) {
+                // Trigger lightning only if "AnyMob" is enabled and another player killed the mob
+                spawnLightning(mob);
+            }
         }
 
         playerAttackerMap.remove(mob);  // Clean up attacker map after handling
         // Thank you y.a.g.a. for the newly added mob section
     }
+
 
     private void spawnLightning(Entity entity) {
         if (minecraft.level != null && minecraft.level.isClientSide) {
