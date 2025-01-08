@@ -36,8 +36,12 @@
 
 ## How to Use:
 
-- Enable the plugin and configure the settings according to your preferences.
-- Experience lightning effects when a totem pops or when players die based on your configured settings.
+1. Download and install the plugin.
+2. Enable the plugin in RusherHacks.
+3. Configure the settings according to your preferences:
+    - Choose whether to enable or disable lightning for totem pops, player deaths, and mob deaths.
+    - Fine-tune sub-settings to control specific behaviors like "Self" for totems or "AttackMob" for mobs.
+4. Experience lightning effects in-game based on your configured settings.
 
 
 
