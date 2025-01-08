@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/%F0%9F%A7%84-Approved%20%E2%9C%94%EF%B8%8F-blue?style=flat" alt="🧄 Approved ✔️">
 </p>
 
----
+
 
 ## ⚡Features:
 
@@ -25,7 +25,6 @@
   - **AttackMob:** Trigger lightning when _you_ kill a mob.
   - **AnyMob:** Trigger lightning when _any player_ in your render distance kills a mob.
 
----
 
 ## Module Settings:
 
@@ -33,14 +32,14 @@
     <img src="assets/module.png" alt="LightningPop Module" width="250">
 </p>
 
----
+
 
 ## How to Use:
 
 - Enable the plugin and configure the settings according to your preferences.
 - Experience lightning effects when a totem pops or when players die based on your configured settings.
 
----
+
 
 ## Contributing:
 
