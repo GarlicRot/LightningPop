@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.Mob;
 import org.rusherhack.client.api.events.network.EventPacket;
 import org.rusherhack.client.api.feature.module.ModuleCategory;
 import org.rusherhack.client.api.feature.module.ToggleableModule;
@@ -21,7 +22,7 @@ import java.util.Map;
 
 /**
  * Module that triggers lightning effects in Minecraft when certain events occur,
- * such as totem pops or player deaths.
+ * such as totem pops, player deaths, or mob deaths.
  */
 public class LightningPopModule extends ToggleableModule {
     private final Minecraft minecraft = Minecraft.getInstance();
@@ -32,6 +33,11 @@ public class LightningPopModule extends ToggleableModule {
     private final BooleanSetting playerDeath = new BooleanSetting("PlayerDeath", "Lightning on player death", true);
     private final BooleanSetting attackDeath = new BooleanSetting("AttackDeath", "Lightning on player attack death", true);
     private final BooleanSetting anyDeath = new BooleanSetting("AnyDeath", "Lightning on any player death within visual range", true);
+    
+    // New settings for mob effects
+    private final BooleanSetting mobs = new BooleanSetting("Mobs", "Lightning on mob death", true);
+    private final BooleanSetting attackMob = new BooleanSetting("AttackMob", "Lightning on mob attack kill", true);
+    private final BooleanSetting anyMob = new BooleanSetting("AnyMob", "Lightning on any mob death within visual range", true);
 
     private final Map<Entity, Entity> playerAttackerMap = new HashMap<>();
 
@@ -39,7 +45,8 @@ public class LightningPopModule extends ToggleableModule {
         super("LightningPop", ModuleCategory.MISC);
         this.totemPop.addSubSettings(this.selfTotemPop);
         this.playerDeath.addSubSettings(this.attackDeath, this.anyDeath);
-        this.registerSettings(this.totemPop, this.playerDeath);
+        this.mobs.addSubSettings(this.attackMob, this.anyMob);
+        this.registerSettings(this.totemPop, this.playerDeath, this.mobs);
     }
 
     @Subscribe
@@ -59,7 +66,7 @@ public class LightningPopModule extends ToggleableModule {
         if (!source.is(DamageTypes.PLAYER_ATTACK) && !source.is(DamageTypes.PLAYER_EXPLOSION)) return;
 
         Entity entity = minecraft.level.getEntity(damagePacket.entityId());
-        if (entity instanceof Player) {
+        if (entity instanceof Player || entity instanceof Mob) {  // Track both players and mobs
             Entity attacker = minecraft.level.getEntity(damagePacket.sourceCauseId());
             playerAttackerMap.put(entity, attacker);
         }
@@ -74,6 +81,12 @@ public class LightningPopModule extends ToggleableModule {
             handleTotemPopEvent(entityPacket);
         } else if (eventId == 3) {
             handlePlayerDeathEvent(entityPacket);
+        } else {
+            // Check if the entity is a mob and handle mob deaths
+            Entity entity = entityPacket.getEntity(minecraft.level);
+            if (entity instanceof Mob) {
+                handleMobDeathEvent(entity);
+            }
         }
     }
 
@@ -100,10 +113,26 @@ public class LightningPopModule extends ToggleableModule {
         }
     }
 
-    private void spawnLightning(Player player) {
+    private void handleMobDeathEvent(Entity entity) {
+        if (!(entity instanceof Mob mob)) return;
+
+        // Check if the mob was killed by a player
+        Entity attacker = playerAttackerMap.get(mob);
+        if (!(attacker instanceof Player)) return;  // Only proceed if attacker is a player
+
+        // Handle the AttackMob and AnyMob settings
+        if (mobs.getValue() && ((attacker == minecraft.player && attackMob.getValue()) || anyMob.getValue())) {
+            spawnLightning(mob);
+        }
+
+        playerAttackerMap.remove(mob);  // Clean up attacker map after handling
+        // Thank you y.a.g.a. for the newly added mob section
+    }
+
+    private void spawnLightning(Entity entity) {
         if (minecraft.level != null && minecraft.level.isClientSide) {
             LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, minecraft.level);
-            lightningBolt.setPos(player.position());
+            lightningBolt.setPos(entity.position());
             // Thank you kybe236
             this.minecraft.level.addEntity(lightningBolt);
         }
