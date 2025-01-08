@@ -63,14 +63,24 @@ public class LightningPopModule extends ToggleableModule {
         if (minecraft.level == null) return;
 
         DamageSource source = damagePacket.getSource(minecraft.level);
-        if (!source.is(DamageTypes.PLAYER_ATTACK) && !source.is(DamageTypes.PLAYER_EXPLOSION)) return;
+        Entity attacker = source.getEntity();
+
+        // Check if the damage source is a melee attack or an explosion caused by a player
+        boolean isPlayerAttack = source.is(DamageTypes.PLAYER_ATTACK) || source.is(DamageTypes.PLAYER_EXPLOSION);
+
+        // Check if the damage source is a projectile (arrow or trident) fired by a player
+        boolean isPlayerProjectile = (attacker instanceof Player) || 
+                                    (attacker != null && (attacker.getType() == EntityType.ARROW || 
+                                                        attacker.getType() == EntityType.TRIDENT));
+
+        if (!isPlayerAttack && !isPlayerProjectile) return;
 
         Entity entity = minecraft.level.getEntity(damagePacket.entityId());
         if (entity instanceof Player || entity instanceof Mob) {  // Track both players and mobs
-            Entity attacker = minecraft.level.getEntity(damagePacket.sourceCauseId());
             playerAttackerMap.put(entity, attacker);
         }
     }
+
 
     private void handleEntityEventPacket(ClientboundEntityEventPacket entityPacket) {
         if (minecraft.level == null) return;
