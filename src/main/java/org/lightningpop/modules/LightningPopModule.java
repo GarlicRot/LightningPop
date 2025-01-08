@@ -66,7 +66,7 @@ public class LightningPopModule extends ToggleableModule {
         if (!source.is(DamageTypes.PLAYER_ATTACK) && !source.is(DamageTypes.PLAYER_EXPLOSION)) return;
 
         Entity entity = minecraft.level.getEntity(damagePacket.entityId());
-        if (entity instanceof Player) {
+        if (entity instanceof Player || entity instanceof Mob) {  // Track both players and mobs
             Entity attacker = minecraft.level.getEntity(damagePacket.sourceCauseId());
             playerAttackerMap.put(entity, attacker);
         }
@@ -81,6 +81,12 @@ public class LightningPopModule extends ToggleableModule {
             handleTotemPopEvent(entityPacket);
         } else if (eventId == 3) {
             handlePlayerDeathEvent(entityPacket);
+        } else {
+            // Check if the entity is a mob and handle mob deaths
+            Entity entity = entityPacket.getEntity(minecraft.level);
+            if (entity instanceof Mob) {
+                handleMobDeathEvent(entity);
+            }
         }
     }
 
@@ -110,14 +116,16 @@ public class LightningPopModule extends ToggleableModule {
     private void handleMobDeathEvent(Entity entity) {
         if (!(entity instanceof Mob mob)) return;
 
+        // Check if the mob was killed by a player
         Entity attacker = playerAttackerMap.get(mob);
-        if (attacker != null) {
-            playerAttackerMap.remove(mob);
-        }
+        if (!(attacker instanceof Player)) return;  // Only proceed if attacker is a player
 
-        if (mobs.getValue() && ((attacker != null && attackMob.getValue()) || anyMob.getValue())) {
+        // Handle the AttackMob and AnyMob settings
+        if (mobs.getValue() && ((attacker == minecraft.player && attackMob.getValue()) || anyMob.getValue())) {
             spawnLightning(mob);
         }
+
+        playerAttackerMap.remove(mob);  // Clean up attacker map after handling
         // Thank you y.a.g.a. for the newly added mob section
     }
 
