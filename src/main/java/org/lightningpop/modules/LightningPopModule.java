@@ -9,6 +9,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Mob;
 import org.rusherhack.client.api.events.network.EventPacket;
@@ -29,12 +30,13 @@ public class LightningPopModule extends ToggleableModule {
 
     // Settings for different lightning effects
     private final BooleanSetting totemPop = new BooleanSetting("TotemPop", "Lightning on totem pop", true);
-    private final BooleanSetting selfTotemPop = new BooleanSetting("Self", "Include your own totem pops", true);
+    private final BooleanSetting totemPopSelf = new BooleanSetting("Self", "Lightning when you pop a totem", true);
+    private final BooleanSetting totemPopPlayer = new BooleanSetting("Player", "Lightning when another player pops a totem", true);
+
     private final BooleanSetting playerDeath = new BooleanSetting("PlayerDeath", "Lightning on player death", true);
     private final BooleanSetting attackDeath = new BooleanSetting("AttackDeath", "Lightning on player attack death", true);
     private final BooleanSetting anyDeath = new BooleanSetting("AnyDeath", "Lightning on any player death within visual range", true);
-    
-    // New settings for mob effects
+
     private final BooleanSetting mobs = new BooleanSetting("Mobs", "Lightning on mob death", true);
     private final BooleanSetting attackMob = new BooleanSetting("AttackMob", "Lightning on mob attack kill", true);
     private final BooleanSetting anyMob = new BooleanSetting("AnyMob", "Lightning on any mob death within visual range", true);
@@ -43,7 +45,7 @@ public class LightningPopModule extends ToggleableModule {
 
     public LightningPopModule() {
         super("LightningPop", ModuleCategory.MISC);
-        this.totemPop.addSubSettings(this.selfTotemPop);
+        this.totemPop.addSubSettings(this.totemPopSelf, this.totemPopPlayer);
         this.playerDeath.addSubSettings(this.attackDeath, this.anyDeath);
         this.mobs.addSubSettings(this.attackMob, this.anyMob);
         this.registerSettings(this.totemPop, this.playerDeath, this.mobs);
@@ -63,24 +65,42 @@ public class LightningPopModule extends ToggleableModule {
         if (minecraft.level == null) return;
 
         DamageSource source = damagePacket.getSource(minecraft.level);
-        Entity attacker = source.getEntity();
+        Entity directEntity = source.getDirectEntity(); // Direct entity causing the damage
+        Entity attacker = source.getEntity(); // Entity indirectly causing the damage (e.g., player)
 
-        // Check if the damage source is a melee attack or an explosion caused by a player
-        boolean isPlayerAttack = source.is(DamageTypes.PLAYER_ATTACK) || source.is(DamageTypes.PLAYER_EXPLOSION);
+        // Handle melee attacks
+        if (source.is(DamageTypes.PLAYER_ATTACK)) {
+            trackAttacker(damagePacket, attacker);
+            return;
+        }
 
-        // Check if the damage source is a projectile (arrow or trident) fired by a player
-        boolean isPlayerProjectile = (attacker instanceof Player) || 
-                                    (attacker != null && (attacker.getType() == EntityType.ARROW || 
-                                                        attacker.getType() == EntityType.TRIDENT));
+        // Handle player-triggered explosions
+        if (source.is(DamageTypes.PLAYER_EXPLOSION) && attacker instanceof Player) {
+            trackAttacker(damagePacket, attacker);
+            return;
+        }
 
-        if (!isPlayerAttack && !isPlayerProjectile) return;
+        // Handle End Crystal explosions
+        if (source.is(DamageTypes.EXPLOSION) && directEntity != null && directEntity.getType() == EntityType.END_CRYSTAL) {
+            if (attacker instanceof Player) {
+                trackAttacker(damagePacket, attacker);
+            }
+            return;
+        }
 
-        Entity entity = minecraft.level.getEntity(damagePacket.entityId());
-        if (entity instanceof Player || entity instanceof Mob) {  // Track both players and mobs
-            playerAttackerMap.put(entity, attacker);
+        // Handle projectiles (arrows and tridents)
+        if (directEntity instanceof AbstractArrow arrow && arrow.getOwner() instanceof Player) {
+            trackAttacker(damagePacket, (Player) arrow.getOwner());
         }
     }
 
+
+    private void trackAttacker(ClientboundDamageEventPacket damagePacket, Entity attacker) {
+        Entity entity = minecraft.level.getEntity(damagePacket.entityId());
+        if (entity instanceof Player || entity instanceof Mob) {
+            playerAttackerMap.put(entity, attacker);
+        }
+    }
 
     private void handleEntityEventPacket(ClientboundEntityEventPacket entityPacket) {
         if (minecraft.level == null) return;
@@ -104,8 +124,14 @@ public class LightningPopModule extends ToggleableModule {
         Entity entity = entityPacket.getEntity(minecraft.level);
         if (!(entity instanceof Player player)) return;
 
-        if (totemPop.getValue() && (selfTotemPop.getValue() || player != minecraft.player)) {
-            spawnLightning(player);
+        if (totemPop.getValue()) {
+            if (player == minecraft.player && totemPopSelf.getValue()) {
+                // Trigger lightning when you pop a totem
+                spawnLightning(player);
+            } else if (player != minecraft.player && totemPopPlayer.getValue()) {
+                // Trigger lightning when another player pops a totem
+                spawnLightning(player);
+            }
         }
     }
 
@@ -128,7 +154,7 @@ public class LightningPopModule extends ToggleableModule {
 
         // Check if the mob was killed by a player
         Entity attacker = playerAttackerMap.get(mob);
-        if (!(attacker instanceof Player)) return;  // Only proceed if attacker is a player
+        if (!(attacker instanceof Player)) return;
 
         // Handle the AttackMob and AnyMob settings
         if (mobs.getValue()) {
@@ -144,7 +170,6 @@ public class LightningPopModule extends ToggleableModule {
         playerAttackerMap.remove(mob);  // Clean up attacker map after handling
         // Thank you y.a.g.a. for the newly added mob section
     }
-
 
     private void spawnLightning(Entity entity) {
         if (minecraft.level != null && minecraft.level.isClientSide) {
