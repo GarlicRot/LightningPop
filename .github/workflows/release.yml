@@ -1,27 +1,24 @@
-name: Manual Plugin Build and Auto-Tag Release
+name: Auto Release After Build
 
 on:
-  workflow_dispatch:  # Manually triggered workflow
+  workflow_run:
+    workflows: ["Manual Plugin Build"]
+    types:
+      - completed
 
 jobs:
-  build-and-release:
+  release:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: plugin-jar
+          path: build/libs
+
       - name: Check out repository
         uses: actions/checkout@v3
-
-      - name: Gradle Wrapper Verification
-        uses: gradle/wrapper-validation-action@v1
-
-      - name: Setup JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Elevate wrapper permissions
-        run: chmod +x ./gradlew
 
       - name: Get and increment latest tag
         id: get_tag
@@ -68,12 +65,7 @@ jobs:
           git tag ${{ env.new_tag }}
           git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} ${{ env.new_tag }}
 
-      - name: Build Plugin
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: build
-
-      - name: Release Artifact
+      - name: Create GitHub Release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
