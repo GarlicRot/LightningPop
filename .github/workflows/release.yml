@@ -20,18 +20,23 @@ jobs:
       - name: Get and increment latest tag
         id: get_tag
         run: |
-          # Fetch the latest tag
-          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo "Latest tag: $latest_tag"
-          
-          # Remove 'v' prefix and split version into parts
-          version=${latest_tag#v}
-          IFS='.' read -r major minor patch <<< "$version"
+          # Check if there are any tags
+          if git tag | grep .; then
+            latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+            echo "Latest tag: $latest_tag"
 
-          # Increment patch version by 1
-          new_patch=$((patch + 1))
-          new_tag="v$major.$minor.$new_patch"
-          
+            # Remove 'v' prefix and split version into parts
+            version=${latest_tag#v}
+            IFS='.' read -r major minor patch <<< "$version"
+
+            # Increment patch version by 1
+            new_patch=$((patch + 1))
+            new_tag="v$major.$minor.$new_patch"
+          else
+            # Default to v0.0.1 if no tags exist
+            new_tag="v0.0.1"
+          fi
+
           echo "New tag: $new_tag"
           echo "new_tag=$new_tag" >> $GITHUB_ENV
 
