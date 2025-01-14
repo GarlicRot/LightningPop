@@ -60,23 +60,10 @@ jobs:
           echo "new_tag=$new_tag" >> $GITHUB_ENV
           echo "new_version=$new_version" >> $GITHUB_ENV
 
-      - name: Update version in build.gradle
+      - name: Update plugin_version in gradle.properties
         run: |
-          sed -i "s/version = '.*'/version = '${{ env.new_version }}'/" build.gradle
+          sed -i "s/^plugin_version = .*/plugin_version = ${{
+            env.new_version }}/" gradle.properties
 
       - name: Elevate wrapper permissions
         run: chmod +x ./gradlew
-
-      - name: Build Plugin
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: build
-
-      - name: Commit and push build artifact
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git checkout -b temp-build
-          git add -f build/libs/LightningPop-*.jar
-          git commit -m "Add build artifact"
-          git push --force https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} temp-build
