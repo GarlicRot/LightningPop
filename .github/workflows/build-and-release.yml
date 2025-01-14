@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - name: Check out master branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: master
 
@@ -31,11 +31,14 @@ jobs:
       - name: Build Plugin for Master (1.21.4)
         run: ./gradlew build
 
+      - name: Rename and Upload artifact for master branch (1.21.4)
+        run: mv build/libs/LightningPop-*.jar build/libs/LightningPop-1.21.4.jar
+
       - name: Upload artifact for master branch (1.21.4)
         uses: actions/upload-artifact@v4
         with:
           name: LightningPop-master
-          path: build/libs/LightningPop-*.jar
+          path: build/libs/LightningPop-1.21.4.jar
 
   build-2b:
     needs: build-master
@@ -43,7 +46,7 @@ jobs:
 
     steps:
       - name: Check out 2b branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: 2b
 
@@ -65,11 +68,14 @@ jobs:
       - name: Build Plugin for 2b (1.20.4)
         run: ./gradlew build
 
+      - name: Rename and Upload artifact for 2b branch (1.20.4)
+        run: mv build/libs/LightningPop-*.jar build/libs/LightningPop-1.20.4.jar
+
       - name: Upload artifact for 2b branch (1.20.4)
         uses: actions/upload-artifact@v4
         with:
           name: LightningPop-2b
-          path: build/libs/LightningPop-*.jar
+          path: build/libs/LightningPop-1.20.4.jar
 
   release:
     needs: [build-master, build-2b]
@@ -80,7 +86,7 @@ jobs:
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download build artifact (master)
         uses: actions/download-artifact@v4
@@ -147,5 +153,5 @@ jobs:
           automatic_release_tag: "${{ env.new_tag }}"
           prerelease: false
           files: |
-            LightningPop-master/LightningPop-*.jar
-            LightningPop-2b/LightningPop-*.jar
+            LightningPop-master/LightningPop-1.21.4.jar
+            LightningPop-2b/LightningPop-1.20.4.jar
