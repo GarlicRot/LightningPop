@@ -18,35 +18,24 @@ jobs:
 
       - name: Update plugin version in gradle.properties
         run: |
-          # Extract current version from gradle.properties
           current_version=$(grep '^plugin_version =' gradle.properties | cut -d' ' -f3)
           IFS='.' read -r major minor patch <<< "$current_version"
-
-          # Increment patch version by 1
           new_patch=$((patch + 1))
-
-          # Check if patch exceeds 9, and increment minor version if needed
           if [ "$new_patch" -gt 9 ]; then
             new_patch=0
             new_minor=$((minor + 1))
           else
             new_minor=$minor
           fi
-
-          # Check if minor exceeds 9, and increment major version if needed
           if [ "$new_minor" -gt 9 ]; then
             new_minor=0
             new_major=$((major + 1))
           else
             new_major=$major
           fi
-
           new_version="$new_major.$new_minor.$new_patch"
-
-          # Update the version in gradle.properties
-          sed -i "s/^plugin_version = .*/plugin_version = $new_version/" gradle.properties
-
-          # Commit and push changes
+          echo "plugin_version = $new_version" > gradle.properties
+          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add gradle.properties
@@ -92,35 +81,24 @@ jobs:
 
       - name: Update plugin version in gradle.properties
         run: |
-          # Extract current version from gradle.properties
           current_version=$(grep '^plugin_version =' gradle.properties | cut -d' ' -f3)
           IFS='.' read -r major minor patch <<< "$current_version"
-
-          # Increment patch version by 1
           new_patch=$((patch + 1))
-
-          # Check if patch exceeds 9, and increment minor version if needed
           if [ "$new_patch" -gt 9 ]; then
             new_patch=0
             new_minor=$((minor + 1))
           else
             new_minor=$minor
           fi
-
-          # Check if minor exceeds 9, and increment major version if needed
           if [ "$new_minor" -gt 9 ]; then
             new_minor=0
             new_major=$((major + 1))
           else
             new_major=$major
           fi
-
           new_version="$new_major.$new_minor.$new_patch"
-
-          # Update the version in gradle.properties
-          sed -i "s/^plugin_version = .*/plugin_version = $new_version/" gradle.properties
-
-          # Commit and push changes
+          echo "plugin_version = $new_version" > gradle.properties
+          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add gradle.properties
@@ -177,38 +155,22 @@ jobs:
       - name: Get and increment latest tag
         id: get_tag
         run: |
-          # Fetch all tags
           git fetch --tags --force
-
-          # Get the latest tag
           latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1) || echo "v0.0.0")
           echo "Latest tag: $latest_tag"
-
-          # Remove 'v' prefix and split version into parts
           version=${latest_tag#v}
           IFS='.' read -r major minor patch <<< "$version"
-
-          # Increment patch version by 1
           new_patch=$((patch + 1))
-          new_minor=$minor
-          new_major=$major
-
-          # Check if patch exceeds 9
           if [ "$new_patch" -gt 9 ]; then
             new_patch=0
             new_minor=$((minor + 1))
           fi
-
-          # Check if minor exceeds 9
           if [ "$new_minor" -gt 9 ]; then
             new_minor=0
             new_major=$((major + 1))
           fi
-
           new_tag="v$new_major.$new_minor.$new_patch"
-
-          echo "New tag: $new_tag"
-          echo "new_tag=$new_tag" >> $GITHUB_ENV
+          echo "NEW_TAG=$new_tag" >> $GITHUB_ENV
 
       - name: Create and push new tag
         env:
@@ -217,14 +179,14 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git fetch --unshallow --tags
-          git tag ${{ env.new_tag }}
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} ${{ env.new_tag }}
+          git tag ${{ env.NEW_TAG }}
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} ${{ env.NEW_TAG }}
 
       - name: Create GitHub Release
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ env.new_tag }}"
+          automatic_release_tag: "${{ env.NEW_TAG }}"
           prerelease: false
           files: |
             LightningPop-master/LightningPop-1.21.4.jar
