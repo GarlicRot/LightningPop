@@ -4,45 +4,61 @@ on:
   workflow_dispatch:  # Manually triggered workflow
 
 jobs:
-  build:
-    runs-on: ubuntu-24.04  # Use the latest Ubuntu version
-    strategy:
-      matrix:
-        branch: [master, 2b]  # Define branches for different Minecraft versions
-        include:  # Specify valid combinations only
-          - branch: master
-            java_version: 21
-            minecraft_version: "1.21.4"
-          - branch: 2b
-            java_version: 17
-            minecraft_version: "1.20.4"
+  build-master:
+    runs-on: ubuntu-24.04
 
     steps:
-      - name: Check out repository
+      - name: Check out master branch
         uses: actions/checkout@v3
         with:
-          ref: ${{ matrix.branch }}
+          ref: master
 
-      - name: Set up JDK
+      - name: Gradle Wrapper Verification
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup JDK for Java 21
         uses: actions/setup-java@v3
         with:
-          java-version: ${{ matrix.java_version }}
+          java-version: '21'
           distribution: 'temurin'
 
-      - name: Elevate wrapper permissions
-        run: chmod +x ./gradlew
-
-      - name: Update Minecraft version in gradle.properties
-        run: |
-          sed -i "s/^minecraft_version = .*/minecraft_version = ${{ matrix.minecraft_version }}/" gradle.properties
-
-      - name: Build Plugin
+      - name: Build Plugin for Master (1.21.4)
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build
 
-      - name: Copy Build Artifact
-        run: |
-          mkdir -p build/artifacts
-          cp build/libs/LightningPop-*.jar build/artifacts/LightningPop-${{ matrix.minecraft_version }}.jar
-          echo "Built artifact for branch: ${{ matrix.branch }} with Minecraft ${{ matrix.minecraft_version }}"
+      - name: Upload build artifact (Master)
+        uses: actions/upload-artifact@v3
+        with:
+          name: LightningPop-master
+          path: build/libs/LightningPop-*.jar
+
+  build-2b:
+    needs: build-master
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out 2b branch
+        uses: actions/checkout@v3
+        with:
+          ref: 2b
+
+      - name: Gradle Wrapper Verification
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup JDK for Java 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Plugin for 2b (1.20.4)
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
+
+      - name: Upload build artifact (2b)
+        uses: actions/upload-artifact@v3
+        with:
+          name: LightningPop-2b
+          path: build/libs/LightningPop-*.jar
