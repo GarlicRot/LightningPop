@@ -52,15 +52,17 @@ jobs:
           fi
 
           new_tag="v$new_major.$new_minor.$new_patch"
+          new_version="$new_major.$new_minor.$new_patch"  # Version without 'v' prefix
 
           echo "New tag: $new_tag"
 
-          # Save new_tag as an environment variable using environment files
+          # Save new_tag and new_version as environment variables
           echo "new_tag=$new_tag" >> $GITHUB_ENV
+          echo "new_version=$new_version" >> $GITHUB_ENV
 
       - name: Update version in build.gradle
         run: |
-          sed -i "s/version = '.*'/version = '${{ env.new_tag#v }}'/" build.gradle
+          sed -i "s/version = '.*'/version = '${{ env.new_version }}'/" build.gradle
 
       - name: Elevate wrapper permissions
         run: chmod +x ./gradlew
