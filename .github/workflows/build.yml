@@ -8,8 +8,9 @@ jobs:
     runs-on: ubuntu-24.04  # Use the latest Ubuntu version
     strategy:
       matrix:
-        branch: [master, 2b]  # Define branches for Java 21 and Java 17 builds
+        branch: [master, 2b]  # Define branches for different Minecraft versions
         java_version: [21, 17]  # Corresponding Java versions
+        minecraft_version: ["1.21.4", "1.20.4"]  # Minecraft versions
 
     steps:
       - name: Check out repository
@@ -26,6 +27,10 @@ jobs:
       - name: Elevate wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Update Minecraft version in gradle.properties
+        run: |
+          sed -i "s/^minecraft_version = .*/minecraft_version = ${{ matrix.minecraft_version }}/" gradle.properties
+
       - name: Build Plugin
         uses: gradle/gradle-build-action@v2
         with:
@@ -34,13 +39,13 @@ jobs:
       - name: Copy Build Artifact
         run: |
           mkdir -p build/artifacts
-          cp build/libs/LightningPop-*.jar build/artifacts/LightningPop-${{ matrix.branch }}.jar
-          echo "Built artifact for branch: ${{ matrix.branch }} with Java ${{ matrix.java_version }}"
-          
+          cp build/libs/LightningPop-*.jar build/artifacts/LightningPop-${{ matrix.minecraft_version }}.jar
+          echo "Built artifact for branch: ${{ matrix.branch }} with Minecraft ${{ matrix.minecraft_version }}"
+
       - name: Commit and push build artifacts
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add build/artifacts/*
-          git commit -m "Add build artifacts for ${{ matrix.branch }}"
+          git commit -m "Add build artifacts for Minecraft ${{ matrix.minecraft_version }}"
           git push --force https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} temp-build
