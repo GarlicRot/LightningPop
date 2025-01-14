@@ -68,5 +68,5 @@ jobs:
           automatic_release_tag: "${{ env.new_tag }}"
           prerelease: false
           files: |
-            build/artifacts/LightningPop-master.jar
-            build/artifacts/LightningPop-2b.jar
+            build/artifacts/LightningPop-1.21.4.jar
+            build/artifacts/LightningPop-1.20.4.jar
