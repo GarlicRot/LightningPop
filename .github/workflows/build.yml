@@ -7,6 +7,9 @@ jobs:
   build-master:
     runs-on: ubuntu-24.04
 
+    outputs:
+      artifact_master: ${{ steps.upload_master.outputs.artifact-path }}
+
     steps:
       - name: Check out master branch
         uses: actions/checkout@v3
@@ -15,7 +18,7 @@ jobs:
 
       - name: Gradle Wrapper Verification
         uses: gradle/wrapper-validation-action@v1
-    
+
       - name: Set executable permissions for gradlew
         run: chmod +x ./gradlew
 
@@ -31,6 +34,7 @@ jobs:
           arguments: build
 
       - name: Upload artifact for master branch (1.21.4)
+        id: upload_master
         uses: actions/upload-artifact@v4
         with:
           name: LightningPop-master
@@ -39,6 +43,9 @@ jobs:
   build-2b:
     needs: build-master
     runs-on: ubuntu-24.04
+
+    outputs:
+      artifact_2b: ${{ steps.upload_2b.outputs.artifact-path }}
 
     steps:
       - name: Check out 2b branch
@@ -64,6 +71,7 @@ jobs:
           arguments: build
 
       - name: Upload artifact for 2b branch (1.20.4)
+        id: upload_2b
         uses: actions/upload-artifact@v4
         with:
           name: LightningPop-2b
