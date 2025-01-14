@@ -6,10 +6,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04  # Use the latest Ubuntu version
+    strategy:
+      matrix:
+        branch: [master, 2b]  # Define the branches to build
+        java-version: [17, 21]  # Java versions corresponding to branches
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+        with:
+          ref: ${{ matrix.branch }}  # Check out the specific branch
 
       - name: Gradle Wrapper Verification
         uses: gradle/wrapper-validation-action@v1
@@ -17,7 +23,7 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: ${{ matrix.java-version }}
           distribution: 'temurin'
 
       - name: Get and increment latest tag
@@ -26,7 +32,7 @@ jobs:
           # Fetch all tags
           git fetch --tags
 
-          # Get the latest tag
+          # Get the latest tag for the current branch
           latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
           echo "Latest tag: $latest_tag"
 
@@ -77,14 +83,14 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          
-          # Commit and push to temp-build branch for the release workflow
+
+          # Commit and push to a temp-build branch for the release workflow
           git checkout -b temp-build
           git add -f build/libs/LightningPop-*.jar gradle.properties  # Force add gradle.properties
           git commit -m "Add build artifact and update version"
           git push --force https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} temp-build
-          
-          # Commit and push updated gradle.properties to master
-          git checkout master
+
+          # Commit and push updated gradle.properties to the original branch
+          git checkout ${{ matrix.branch }}
           git merge temp-build --no-ff --commit --allow-unrelated-histories
-          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} master
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} ${{ matrix.branch }}
