@@ -30,7 +30,7 @@ jobs:
         with:
           arguments: build
 
-      - name: Upload build artifact (Master)
+      - name: Upload artifact for master branch (1.21.4)
         uses: actions/upload-artifact@v3
         with:
           name: LightningPop-master
@@ -63,7 +63,7 @@ jobs:
         with:
           arguments: build
 
-      - name: Upload build artifact (2b)
+      - name: Upload artifact for 2b branch (1.20.4)
         uses: actions/upload-artifact@v3
         with:
           name: LightningPop-2b
