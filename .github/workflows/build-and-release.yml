@@ -53,6 +53,9 @@ jobs:
           git commit -m "Update plugin version to $new_version"
           git push origin master
 
+          # Export new version as an environment variable
+          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
+
       - name: Verify Gradle Wrapper
         run: ./gradlew --version
 
@@ -126,6 +129,9 @@ jobs:
           git add gradle.properties
           git commit -m "Update plugin version to $new_version"
           git push origin 2b
+
+          # Export new version as an environment variable
+          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
 
       - name: Verify Gradle Wrapper
         run: ./gradlew --version
@@ -208,7 +214,7 @@ jobs:
           new_tag="v$new_major.$new_minor.$new_patch"
 
           echo "New tag: $new_tag"
-          echo "new_tag=$new_tag" >> $GITHUB_ENV
+          echo "NEW_TAG=$new_tag" >> $GITHUB_ENV
 
       - name: Create and push new tag
         env:
@@ -217,14 +223,14 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git fetch --unshallow --tags
-          git tag ${{ env.new_tag }}
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} ${{ env.new_tag }}
+          git tag ${{ env.NEW_TAG }}
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} ${{ env.NEW_TAG }}
 
       - name: Create GitHub Release
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ env.new_tag }}"
+          automatic_release_tag: "${{ env.NEW_TAG }}"
           prerelease: false
           files: |
             LightningPop-master/LightningPop-1.21.4.jar
