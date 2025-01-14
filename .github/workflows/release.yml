@@ -50,7 +50,13 @@ jobs:
           new_tag="v$new_major.$new_minor.$new_patch"
 
           echo "New tag: $new_tag"
+
+          # Save new_tag as an environment variable using environment files
           echo "new_tag=$new_tag" >> $GITHUB_ENV
+
+      - name: Update version in build.gradle
+        run: |
+          sed -i "s/version = '.*'/version = '${{ env.new_tag#v }}'/" build.gradle
 
       - name: Create and push new tag
         env:
@@ -60,6 +66,11 @@ jobs:
           git config --global user.email "actions@github.com"
           git tag ${{ env.new_tag }}
           git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} ${{ env.new_tag }}
+
+      - name: Build Plugin
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
 
       - name: Create GitHub Release
         uses: "marvinpinto/action-automatic-releases@latest"
