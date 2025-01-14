@@ -8,17 +8,13 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # Use the latest Ubuntu version
 
     steps:
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: plugin-jar
-          path: build/libs
-
-      - name: Check out repository
+      - name: Check out temp-build branch
         uses: actions/checkout@v3
+        with:
+          ref: temp-build
 
       - name: Get and increment latest tag
         id: get_tag
