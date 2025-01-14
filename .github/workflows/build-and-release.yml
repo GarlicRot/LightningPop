@@ -18,11 +18,11 @@ jobs:
 
       - name: Update plugin version in gradle.properties
         run: |
-          sed -i "s/^version=.*/version=${{ env.new_tag }}/" gradle.properties
+          sed -i "s/^plugin_version = .*/plugin_version = ${{ env.new_tag }}/" gradle.properties
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add gradle.properties
-          git commit -m "Update version to ${{ env.new_tag }}"
+          git commit -m "Update plugin version to ${{ env.new_tag }}"
           git push origin master
 
       - name: Verify Gradle Wrapper
@@ -64,11 +64,11 @@ jobs:
 
       - name: Update plugin version in gradle.properties
         run: |
-          sed -i "s/^version=.*/version=${{ env.new_tag }}/" gradle.properties
+          sed -i "s/^plugin_version = .*/plugin_version = ${{ env.new_tag }}/" gradle.properties
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add gradle.properties
-          git commit -m "Update version to ${{ env.new_tag }}"
+          git commit -m "Update plugin version to ${{ env.new_tag }}"
           git push origin 2b
 
       - name: Verify Gradle Wrapper
