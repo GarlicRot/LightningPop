@@ -16,11 +16,14 @@ jobs:
         with:
           ref: master
 
-      - name: Gradle Wrapper Verification
-        uses: gradle/wrapper-validation-action@v1
-
       - name: Set executable permissions for gradlew
         run: chmod +x ./gradlew
+
+      - name: Verify Gradle Wrapper
+        run: ./gradlew --version
+
+      - name: Gradle Wrapper Verification
+        uses: gradle/wrapper-validation-action@v1
 
       - name: Setup JDK for Java 21
         uses: actions/setup-java@v3
@@ -53,14 +56,14 @@ jobs:
         with:
           ref: 2b
 
+      - name: Set executable permissions for gradlew
+        run: chmod +x ./gradlew
+
       - name: Verify Gradle Wrapper
         run: ./gradlew --version
 
       - name: Gradle Wrapper Verification
         uses: gradle/wrapper-validation-action@v1
-
-      - name: Set executable permissions for gradlew
-        run: chmod +x ./gradlew
 
       - name: Setup JDK for Java 17
         uses: actions/setup-java@v3
@@ -107,10 +110,10 @@ jobs:
         id: get_tag
         run: |
           # Fetch all tags
-          git fetch --tags
+          git fetch --tags --force
 
           # Get the latest tag
-          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
           echo "Latest tag: $latest_tag"
 
           # Remove 'v' prefix and split version into parts
@@ -145,12 +148,12 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git fetch --unshallow  # Ensure we have full history for tagging
+          git fetch --unshallow  # Ensure we have the full commit history for tagging
           git tag ${{ env.new_tag }}
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} ${{ env.new_tag }}
 
       - name: Create GitHub Release
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "${{ env.new_tag }}"
