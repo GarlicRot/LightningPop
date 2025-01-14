@@ -81,6 +81,10 @@ jobs:
     needs: [build-master, build-2b]
     runs-on: ubuntu-24.04
 
+    permissions:
+      contents: write
+      workflows: write
+
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
@@ -135,12 +139,12 @@ jobs:
 
       - name: Create and push new tag
         env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git tag ${{ env.new_tag }}
-          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} ${{ env.new_tag }}
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} ${{ env.new_tag }}
 
       - name: Create GitHub Release
         uses: "marvinpinto/action-automatic-releases@latest"
