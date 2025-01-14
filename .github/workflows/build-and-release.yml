@@ -53,6 +53,9 @@ jobs:
         with:
           ref: 2b
 
+      - name: Verify Gradle Wrapper
+        run: ./gradlew --version
+
       - name: Gradle Wrapper Verification
         uses: gradle/wrapper-validation-action@v1
 
@@ -142,6 +145,7 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+          git fetch --unshallow  # Ensure we have full history for tagging
           git tag ${{ env.new_tag }}
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} ${{ env.new_tag }}
 
