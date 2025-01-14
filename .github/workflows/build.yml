@@ -9,8 +9,13 @@ jobs:
     strategy:
       matrix:
         branch: [master, 2b]  # Define branches for different Minecraft versions
-        java_version: [21, 17]  # Corresponding Java versions
-        minecraft_version: ["1.21.4", "1.20.4"]  # Minecraft versions
+        include:  # Specify valid combinations only
+          - branch: master
+            java_version: 21
+            minecraft_version: "1.21.4"
+          - branch: 2b
+            java_version: 17
+            minecraft_version: "1.20.4"
 
     steps:
       - name: Check out repository
@@ -41,11 +46,3 @@ jobs:
           mkdir -p build/artifacts
           cp build/libs/LightningPop-*.jar build/artifacts/LightningPop-${{ matrix.minecraft_version }}.jar
           echo "Built artifact for branch: ${{ matrix.branch }} with Minecraft ${{ matrix.minecraft_version }}"
-
-      - name: Commit and push build artifacts
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add build/artifacts/*
-          git commit -m "Add build artifacts for Minecraft ${{ matrix.minecraft_version }}"
-          git push --force https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} temp-build
