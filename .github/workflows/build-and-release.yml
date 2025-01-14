@@ -18,11 +18,39 @@ jobs:
 
       - name: Update plugin version in gradle.properties
         run: |
-          sed -i "s/^plugin_version = .*/plugin_version = \"${{ env.new_tag }}\"/" gradle.properties
+          # Extract current version from gradle.properties
+          current_version=$(grep '^plugin_version =' gradle.properties | cut -d' ' -f3)
+          IFS='.' read -r major minor patch <<< "$current_version"
+
+          # Increment patch version by 1
+          new_patch=$((patch + 1))
+
+          # Check if patch exceeds 9, and increment minor version if needed
+          if [ "$new_patch" -gt 9 ]; then
+            new_patch=0
+            new_minor=$((minor + 1))
+          else
+            new_minor=$minor
+          fi
+
+          # Check if minor exceeds 9, and increment major version if needed
+          if [ "$new_minor" -gt 9 ]; then
+            new_minor=0
+            new_major=$((major + 1))
+          else
+            new_major=$major
+          fi
+
+          new_version="$new_major.$new_minor.$new_patch"
+
+          # Update the version in gradle.properties
+          sed -i "s/^plugin_version = .*/plugin_version = $new_version/" gradle.properties
+
+          # Commit and push changes
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add gradle.properties
-          git commit -m "Update plugin version to ${{ env.new_tag }}"
+          git commit -m "Update plugin version to $new_version"
           git push origin master
 
       - name: Verify Gradle Wrapper
@@ -64,11 +92,39 @@ jobs:
 
       - name: Update plugin version in gradle.properties
         run: |
-          sed -i "s/^plugin_version = .*/plugin_version = \"${{ env.new_tag }}\"/" gradle.properties
+          # Extract current version from gradle.properties
+          current_version=$(grep '^plugin_version =' gradle.properties | cut -d' ' -f3)
+          IFS='.' read -r major minor patch <<< "$current_version"
+
+          # Increment patch version by 1
+          new_patch=$((patch + 1))
+
+          # Check if patch exceeds 9, and increment minor version if needed
+          if [ "$new_patch" -gt 9 ]; then
+            new_patch=0
+            new_minor=$((minor + 1))
+          else
+            new_minor=$minor
+          fi
+
+          # Check if minor exceeds 9, and increment major version if needed
+          if [ "$new_minor" -gt 9 ]; then
+            new_minor=0
+            new_major=$((major + 1))
+          else
+            new_major=$major
+          fi
+
+          new_version="$new_major.$new_minor.$new_patch"
+
+          # Update the version in gradle.properties
+          sed -i "s/^plugin_version = .*/plugin_version = $new_version/" gradle.properties
+
+          # Commit and push changes
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add gradle.properties
-          git commit -m "Update plugin version to ${{ env.new_tag }}"
+          git commit -m "Update plugin version to $new_version"
           git push origin 2b
 
       - name: Verify Gradle Wrapper
