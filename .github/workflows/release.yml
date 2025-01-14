@@ -15,13 +15,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: LightningPop-master
-          path: LightningPop-master
 
       - name: Download build artifact (2b)
         uses: actions/download-artifact@v4
         with:
           name: LightningPop-2b
-          path: LightningPop-2b
 
       - name: Get and increment latest tag
         id: get_tag
