@@ -11,15 +11,17 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Download build artifacts
+      - name: Download build artifact (master)
         uses: actions/download-artifact@v3
         with:
           name: LightningPop-master
+          path: LightningPop-master
 
-      - name: Download build artifacts (2b)
+      - name: Download build artifact (2b)
         uses: actions/download-artifact@v3
         with:
           name: LightningPop-2b
+          path: LightningPop-2b
 
       - name: Get and increment latest tag
         id: get_tag
