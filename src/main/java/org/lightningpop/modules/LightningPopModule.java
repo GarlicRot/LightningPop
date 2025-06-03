@@ -173,10 +173,12 @@ public class LightningPopModule extends ToggleableModule {
 
     private void spawnLightning(Entity entity) {
         if (minecraft.level != null && minecraft.level.isClientSide) {
-            LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, minecraft.level);
-            lightningBolt.setPos(entity.position());
             // Thank you kybe236
-            this.minecraft.level.addEntity(lightningBolt);
+            minecraft.execute(() -> {
+                LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, minecraft.level);
+                lightningBolt.setPos(entity.position());
+                this.minecraft.level.addEntity(lightningBolt);
+            });
         }
     }
 }
