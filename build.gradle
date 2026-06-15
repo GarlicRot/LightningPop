@@ -1,13 +1,16 @@
 plugins {
 	id 'idea'
 	id 'java'
-	id 'fabric-loom' version '1.9-SNAPSHOT'
+	id 'fabric-loom' version '1.17.11'
 	id 'maven-publish'
 }
 
 version = project.plugin_version
 group = project.maven_group
-archivesBaseName = project.plugin_name
+
+base {
+	archivesName = project.plugin_name
+}
 
 configurations {
 	rusherhackApi

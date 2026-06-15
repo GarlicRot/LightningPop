@@ -9,7 +9,7 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Mob;
 import org.rusherhack.client.api.events.network.EventPacket;
@@ -89,8 +89,8 @@ public class LightningPopModule extends ToggleableModule {
         }
 
         // Handle projectiles (arrows and tridents)
-        if (directEntity instanceof AbstractArrow arrow && arrow.getOwner() instanceof Player) {
-            trackAttacker(damagePacket, (Player) arrow.getOwner());
+        if (directEntity instanceof Projectile projectile && projectile.getOwner() instanceof Player owner) {
+            trackAttacker(damagePacket, owner);
         }
     }
 
@@ -172,7 +172,7 @@ public class LightningPopModule extends ToggleableModule {
     }
 
     private void spawnLightning(Entity entity) {
-        if (minecraft.level != null && minecraft.level.isClientSide) {
+        if (minecraft.level != null && minecraft.level.isClientSide()) {
             // Thank you kybe236
             minecraft.execute(() -> {
                 LightningBolt lightningBolt = new LightningBolt(EntityType.LIGHTNING_BOLT, minecraft.level);
